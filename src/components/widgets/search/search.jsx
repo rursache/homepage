@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useSWR from "swr";
 import { useTranslation } from "next-i18next";
 import { FiSearch } from "react-icons/fi";
 import { SiDuckduckgo, SiMicrosoftbing, SiGoogle, SiBaidu } from "react-icons/si";
@@ -40,14 +41,16 @@ export default function Search({ options }) {
   if (!provider) {
     return null;
   }
+  
+  const { data: privateWidgetOptions } = useSWR(`/api/widgets/search?${new URLSearchParams({ ...options }).toString()}`);
 
   function handleSubmit(event) {
     const q = encodeURIComponent(query);
 
     if (provider.url) {
       window.open(`${provider.url}${q}`, options.target || "_blank");
-    } else {
-      window.open(`${options.url}${q}`, options.target || "_blank");
+    } else if (privateWidgetOptions?.url) {
+      window.open(`${privateWidgetOptions.url}${q}`, options.target || "_blank");
     }
 
     event.preventDefault();
